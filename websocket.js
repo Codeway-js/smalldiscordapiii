@@ -74,9 +74,12 @@ class WebSocket {
         webs.on("error", err => console.error(err))
         webs.on('close', cd => console.log(cd))
         webs.on("pong", () => {
-            return Date.now() - this.heardbeat.lastping
-        })
-    }
+            return Date.now() - this.heardbeat.lastping;
+        });
+    };
+    /**
+     * Get last ping of the WebSocket Connexion 
+     */
     getping(ob) {
         this.heardbeat.lastping = Date.now()
         return this.webs.ping()
