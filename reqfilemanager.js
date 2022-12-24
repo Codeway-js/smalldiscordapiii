@@ -24,6 +24,15 @@ Multipart.prototype.append = function (data) {
 Multipart.prototype.finalize = function () {
     this.result += "\r\n--" + this.boundary + "--";
 };
+/**
+ * 
+ * @param {String} url to send the message
+ * @param {String} token it's nessesary to send a message
+ * @param {Object} data the message's data
+ * @param {Buffer} file the file to send
+ * @param {String} filename the name of the file for discord can be not real
+ * @returns 
+ */
 module.exports = uploadFile = function (url, token, data, file, filename) {
     /* After like 15 minutes of fighting with Request, turns out Discord doesn't allow multiple files in one message...
     despite having an attachments array.*/
@@ -31,7 +40,6 @@ module.exports = uploadFile = function (url, token, data, file, filename) {
     startfile = file
     multi = new Multipart();
     message = data
-    console.log(message)
     isBuffer = (file instanceof Buffer);
     isString = (typeof file === 'string');
 

@@ -1,4 +1,9 @@
 module.exports = class Badges {
+    /**
+     * Basic class for Discord Badges
+     * @param {IDK!} flags 
+     * @param {number} premium 
+     */
     constructor(flags, premium) {
        if (premium && typeof premium == "number"){
             if(premium == 1){

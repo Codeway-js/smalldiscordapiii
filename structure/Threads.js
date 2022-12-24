@@ -1,6 +1,11 @@
 const Channel = require("./Channel")
 const restmanager = require("../reqmanager")
 module.exports = class Threads {
+    /**
+     * @param {ThreadsData} data 
+     * @param {string} token 
+     * @param {number} guid_id 
+     */
     constructor(data, token,guid_id){
        this.token = token
        this.guild_id = guid_id

@@ -3,6 +3,12 @@ const restmanager = require("../reqmanager")
 const channels = require("./Channels")
 const User = require("./User")
 module.exports = class Guild {
+    /**
+     * Basic class for Discord Guild (Why there is a token here ?)
+     * @param {GuildData} data 
+     * @param {string} token
+     * @param {__class} client 
+     */
     constructor(data, token, client) {
         if (typeof data != "object") {
             console.log("once")
@@ -25,10 +31,10 @@ module.exports = class Guild {
         }
         this.token = token
         if (data.channels) {
-            this.channels = new channels(data.channels, token, this.id)
+            this.channels = new channels(data.channels, token, client)
         } else {
             restmanager("https://discord.com/api/v9/guilds/" + this.id + "/channels", this.token, {}, { method: 'get', return: true }).then(data => {
-                this.channels = new channels(data.data, token, this.id)
+                this.channels = new channels(data.data, token, client)
                 // console.log("finish")
             })
             restmanager("https://discord.com/api/v9/guilds/" + this.id, this.token, {}, { method: 'get', return: true }).then(data22 => {
@@ -47,21 +53,33 @@ module.exports = class Guild {
                 this.roles = new roles(data2.roles, token, this.id)
             
                 if (data2.channels) {
-                    this.channels = new channels(data2.channels, token, this.id)
+                    this.channels = new channels(data2.channels, token, client)
                 }
                 // client.guilds.cache.set(this.id, this)
             })
         }
     }
+    /**
+     * Remove the ban of a specific user
+     * @param {number} id 
+     */
     removeban(id) {
         restmanager("https://discord.com/api/v9/guilds/" + this.id + '/bans/' + id, token, {}, { method: "delete" })
     }
+    /**
+     * get the reason for a ban
+     * @param {*} user 
+     */
     async getban(user) {
         let result = await restmanager("https://discord.com/api/v9/guilds/" + this.id + '/bans/' + user.id, token, {}, { method: "get" })
         result = JSON.parse(result)
         return { reason: result.reason, user: new User(result.user) }
     }
-    async getbans(user) {
+    /**
+     * get reasons for bans
+     * @param {*} user 
+     */
+    async getbans() {
         let result = await restmanager("https://discord.com/api/v9/guilds/" + this.id + '/bans/', token, {}, { method: "get" })
         result = JSON.parse(result)
         let arr = []

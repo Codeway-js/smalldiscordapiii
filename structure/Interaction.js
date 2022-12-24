@@ -2,6 +2,12 @@ const message = require("./Message")
 const member = require("./Member")
 const reqmanager = require("../reqmanager")
 module.exports = class Interaction {
+    /**
+     * Basic class for Discord Interaction (Why there is a token here ?)
+     * @param {InteractionData} data 
+     * @param {string} token 
+     * @param {__class} client 
+     */
     constructor(data, token, client) {
         this.token = token
         this.type = data.type
@@ -23,6 +29,10 @@ module.exports = class Interaction {
 
         }
     }
+    /**
+     * Reply to an interaction
+     * @param {IDK!} interaction 
+     */
     reply(interaction) {
         reqmanager(`https://discord.com/api/v10/interactions/${this.id}/${this.interactiontoken}/callback`, this.token, interaction.toJSON(), { method: "post" }).then(t => console.log(t))
     }

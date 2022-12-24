@@ -1,15 +1,19 @@
 const Message = require('./structure/Message')
 const Channel = require('./structure/Channel')
-const reaction = require("./structure/Reaction.js")
+const reaction = require("./structure/Reaction")
 const ws = require('ws')
 const interaction = require("./structure/Interaction")
 const reqmanager = require("./reqmanager")
-const VoiceWebsocket = require('./VoiceWebsocket')
-class WebSocket {
-
-
-
+const VoiceWebsocket = require('./voice/VoiceWebsocket')
+const eventemitter = require("events")
+class WebSocket extends eventemitter{
+    /**
+     * Basic WebSocket connexion to Discord Server
+     * @param {string} token 
+     * @param {IDK!} clientthis 
+     */
     constructor(token, clientthis) {
+        super()
         this.clientthis = clientthis
         this.token = token
         this.heardbeat = {
@@ -29,7 +33,6 @@ class WebSocket {
             this.online = true
         })
         webs.on("message", msg => {
-            // console.log(msg)
             let rresult
             try {
                 rresult = JSON.parse(msg)
@@ -74,9 +77,10 @@ class WebSocket {
         webs.on("error", err => console.error(err))
         webs.on('close', cd => console.log(cd))
         webs.on("pong", () => {
-            return Date.now() - this.heardbeat.lastping;
-        });
-    };
+            return Date.now() - this.heardbeat.lastping
+        })
+    }
+    
     /**
      * Get last ping of the WebSocket Connexion 
      */
@@ -84,12 +88,17 @@ class WebSocket {
         this.heardbeat.lastping = Date.now()
         return this.webs.ping()
     }
+    /**
+     * Handle the incoming event from the Discord Server
+     * @param {*} message 
+     */
     handleevent(message) {
-        if (message.d.mentions) {
-            console.log(message.d.mentions[0])
+        // if (message.d.mentions) {
+        //     console.log(message.d.mentions[0])
 
-        }
-        console.log(message)
+        // }
+        this.clientthis.logs.emit("log","\x1b[31m[Websocket]\x1b[37m received "+message.t)
+        this.emit(message.t,message.d)
         switch (message.t) {
 
             case "READY": {
@@ -117,9 +126,6 @@ class WebSocket {
                     this.clientthis.guilds.cache.get(message.d.guild_id).voicesession = message.d.session_id
                     
                 }
-                break
-            case 'VOICE_SERVER_UPDATE':
-                new VoiceWebsocket(this.clientthis, this.token, message.d.token, message.d.guild_id, message.d.endpoint)
                 break
             case "INTERACTION_CREATE":
                 this.clientthis.emit('interactionCreate', new interaction(message.d, this.token, this.clientthis))
@@ -150,6 +156,8 @@ class WebSocket {
             //     //     {"type": 1}, { method: "post" }
             //     //     )
             // }
+            default:
+                // console.log(message.d)
 
         }
     }

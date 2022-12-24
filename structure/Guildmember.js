@@ -1,4 +1,8 @@
 module.exports = class GuildMember{
+    /**
+     * Function to init the data of the message, such as username, id, avatar, ...
+     * @param {GuildMemberData} data 
+     */
     patch(data){
         if (data.user !== undefined) {
             this.username = data.user.username;
@@ -15,6 +19,10 @@ module.exports = class GuildMember{
             this.avatar = data.author.avatar;
         }
     }
+    /**
+     * Basic class for Discord GuildMember
+     * @param {MessageData} messagedata 
+     */
     constructor(messagedata) {
         this.patch(messagedata)
     }

@@ -1,6 +1,12 @@
 const member = require('./Member')
 const restmanager = require('../reqmanager')
 module.exports = class Reaction {
+    /**
+     * Basic class for Discord Reaction (Why there is a token here ?)
+     * @param {ReactionData} data 
+     * @param {string} token 
+     * @param {number} client 
+     */
     constructor(data, token, client){
         this.id = data.emoji.id
         this.guild_id = data.guild_id

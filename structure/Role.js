@@ -1,4 +1,10 @@
 module.exports = class Role {
+    /**
+     * Basic class for Discord Role (Why there is a token here ?)
+     * @param {RoleData} data 
+     * @param {string} token 
+     * @param {number} guild_id 
+     */
     constructor(data, token, guild_id){
         this.guild_id = guild_id
         this.id = data.id

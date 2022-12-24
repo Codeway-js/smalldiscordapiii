@@ -7,6 +7,11 @@ const Collection = require("./Collection")
 const events = require('events');
 const Guild = require("./Guild")
 module.exports = class Message {
+    /**
+     * Function to init the data of the message, such as Guild, Channel, Mentions, ...
+     * @param {MessageData} data 
+     * @param {User} client 
+     */
     initmessage(data, client) {
         this.tts = data.tts
         this.guild = client.guilds.cache.get(data.guild_id)
@@ -31,16 +36,32 @@ module.exports = class Message {
         this.timestamp = data.timestamp
         this.author = new author(data.author, this._token, this.WS)
     }
+    /**
+     * Basic class for Discord message
+     * @param {MessageData} message 
+     * @param {string} token 
+     * @param {User} client 
+     */
     constructor(message, token, client) {
         this.token = token
         this.client = client
         this.initmessage(message, client)
     }
+    /**
+     * Make the bot ping someone before the message :
+     * - `@Someone YourMessage`
+     * @param {string} message 
+     */
     reply(message) {
         if (!message) throw new Error("no message provied")
         message = `<@${this.author.id}> ${message}`
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages`, this.token, { content: message }, { method: "post" })
     }
+    /**
+     * Make the bot reply to this message
+     * @param {string} message
+     * @param {bool} mention 
+     */
     inlinereply(message, mention = false) {
         const payload = {
             content: message,
@@ -51,24 +72,43 @@ module.exports = class Message {
         }
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages`, this.token, payload, { method: "post" })
     }
+    /**
+     * Pin this message in a discord channel
+     */
     pin() {
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/pin/messages${this.id}`, this.token, {}, { method: "put" })
     }
+    /**
+     * Unpin this message in a discord channel
+     */
     unpin() {
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/pin/messages${this.id}`, this.token, {}, { method: "delete" })
     }
+    /**
+     * React to this message instance
+     * @param {Emoji} emoji 
+     */
     react(emoji) {
         if (emoji.startsWith('<')) {
             emoji = emoji.replace('<:', '').replace('>', '');
         }
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages/${this.id}/reactions/${encodeURIComponent(emoji)}/@me`, this.token, {}, { method: "put" })
     }
+    /**
+     * Remove a user's reaction from this message
+     * @param {Emoji} emoji
+     * @param {User} user
+     */
     deletereact(emoji, user) {
         if (!user) {
             user = { id: "@me" }
         }
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages/${this.id}/reactions/${encodeURIComponent(emoji)}/${user.id}`, this.token, {}, { method: "delete" })
     }
+     /**
+     * Delete all of the reactions for a specific emoji. If you don't specify an emoji, that's just delete all of the reactions
+     * @param {Emoji} emoji
+     */
     deleteallreact(emoji) {
         if (!emoji) {
             return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages/${this.id}/reactions/${encodeURIComponent(emoji)}`, this.token, {}, { method: "delete" })
@@ -76,6 +116,11 @@ module.exports = class Message {
             return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages/${this.id}/reactions`, this.token, {}, { method: "delete" })
         }
     }
+    /**
+     * create a threads
+     * @param {String} name of the threads
+     * @param {Object} options 
+     */
     createthread(name, options) {
         let obj = {
             name: name,
@@ -85,9 +130,16 @@ module.exports = class Message {
         }
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages${this.id}/threads`, this.token, obj, { method: "post" })
     }
+    /**
+     * Delete this message
+     */
     delete() {
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages${this.id}`, this.token, {}, { method: "delete" })
     }
+    /**
+     * Modify this message with a new one
+     * @param {string} message
+     */
     edit(message) {
         if (!message) throw new Error('Message not provied')
         let payload = {
@@ -125,6 +177,11 @@ module.exports = class Message {
         }
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages${this.id}`, this.token, payload, { method: "patch" })
     }
+    /**
+     * wait for reaction
+     * @param {Function} filter 
+     * @param {Object} options 
+     */
     awaitReactions(filter, options) {
         if (!options.max) options.max = Infinity
         if (!options.time) options.time = 30000
@@ -153,6 +210,11 @@ module.exports = class Message {
 
         })
     }
+    /**
+     * Reaction collector
+     * * @param {Function} filter 
+     * @param {Object} options
+     */
     createReactionCollector() {
         var eventEmitter = new events.EventEmitter();
         
@@ -182,12 +244,21 @@ module.exports = class Message {
         })
         return eventEmitter
     }
+    /**
+     * Crosspost the message to all the other guild who have there anouncement chanel on
+     */
     crosspost() {
         return restmanager(`https://discord.com/api/v10/channels/${this.channel.id}/messages${this.id}/crosspost`, this.token, {}, { method: "post" })
     }
+    /**
+     * Return you the content of this message
+     */
     toString(){
         return this.content
     }
+     /**
+     * remove the listener for the reaction collector
+     */
     _end() {
         removeListener('messageRecationAdd', reaction => {
             if (reaction.message.id === this.id) {

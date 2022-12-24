@@ -3,21 +3,33 @@ const websocket = require('./websocket')
 const Guilds = require('./structure/Guilds');
 const User = require('./structure/User')
 const reqmanager = require('./reqmanager')
+const logger = require("./logger")
 module.exports = class Client extends eventmodule {
+    /**
+     * Basic class for Discord client API
+     * @param {Object} option 
+     */
     constructor(option) {
         super();
         if (option) {
             this.option = option
         }
         this.up = false
+        this.logs = new logger(this.option.display)
 
     }
+    /**
+     * Login to Discord Server with the token
+     * Why is there an await/async keyword ?
+     * @param {string} token 
+     */
     async login(token) {
         this.token = token
         this.WS = new websocket(token, this)
-        this.guilds = await new Guilds(token)
+        this.guilds = await new Guilds(token,this)
         this.on("ready", () => {
             this.up = true
+            this.logs.emit("log","[Client] ready at "+Date.now().toString())
             this.readyAt = new Date(Date.now())
             this.readyTimestamp = Date.now()
         })
@@ -27,7 +39,6 @@ module.exports = class Client extends eventmodule {
         reqmanager('https://discord.com/api/v9/users/@me', token, {}, { method: "get" }).then(datar => {
             const data = datar.data
             this.user = new User(data, token)
-            console.log(this.user)
         })
     }
     _getuptime() {
